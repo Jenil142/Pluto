@@ -1,0 +1,14 @@
+# Core
+google-genai>=1.65.0
+cognee>=1.5.4
+python-dotenv>=1.2.2
+pydantic>=2.13.5
+
+# API Server
+fastapi>=0.141.1
+uvicorn>=0.52.4
+
+# Tools
+duckduckgo-search>=8.1.1
+google-api-python-client>=2.188.0
+google-auth-oauthlib>=1.2.4
