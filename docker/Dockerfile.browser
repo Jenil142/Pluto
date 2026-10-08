@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/playwright/python:v1.52.0-noble
+
+WORKDIR /app
+
+# Copy uv binary directly from official image (bypasses all apt/curl network issues)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Use uv to install browser-use and playwright
+RUN uv pip install --system --no-cache browser-use playwright
+
+
+# Copy the browser agent service
+COPY browser_service.py /app/browser_service.py
+
+EXPOSE 9090
+
+CMD ["python", "browser_service.py"]

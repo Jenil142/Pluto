@@ -1,0 +1,20 @@
+services:
+  pluto-browser:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.browser
+    container_name: pluto-browser-agent
+    network_mode: "host"
+    volumes:
+      - ./data/browser_sessions:/data/browser_sessions
+      - ./data/downloads:/data/downloads
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - BROWSER_MODEL=${BROWSER_MODEL:-gemini-3.5-flash-lite}
+      - BROWSER_SERVICE_PORT=9090
+      - DISPLAY=${DISPLAY}
+      - BROWSER_HEADLESS=false
+      - DBUS_SESSION_BUS_ADDRESS=/dev/null
+    restart: unless-stopped
+    shm_size: '2gb'
