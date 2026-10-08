@@ -1,4 +1,16 @@
+# Environment & secrets
 .env
+credentials/
+token.json
+
+# Python
 .venv/
 __pycache__/
+.pytest_cache/
+
+# Runtime data
 data/
+pluto/memory.json
+
+# Agent workspace
+.agents/
