@@ -1,0 +1,214 @@
+--- FOUND IN /home/jenil/.gemini/antigravity/brain/ab767f6f-bbb1-49a6-8fc5-a17e0cee60e5/.system_generated/logs/transcript_full.jsonl ---
+import { useState, useRef, useEffect } from 'react';
+import { ThinkingOrb } from 'thinking-orbs';
+
+const STARTER_PROMPTS = [
+  'Check system status',
+  'Explain Pluto perception-action pipeline',
+  'Design an autonomous warehouse navigation node',
+];
+
+function getStatusLabel(state) {
+  switch (state) {
+    case 'listening':
+      return 'Listening...';
+    case 'connecting':
+      return 'Connecting...';
+    case 'searching':
+      return 'Searching...';
+    case 'solving':
+      return 'Reasoning...';
+    case 'working':
+      return 'Executing...';
+    case 'shaping':
+      return 'Attention';
+    case 'breathing':
+    default:
+      return 'Pluto Ready';
+  }
+}
+
+export default function ChatArea({
+  activeSession,
+  onSendMessage,
+  isProcessing,
+  orbState,
+  onInputFocus,
+  onInputBlur,
+}) {
+  const [inputText, setInputText] = useState('');
+  const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
+
+  const messages = activeSession?.messages || [];
+  const isEmpty = messages.length === 0 && !isProcessing;
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isProcessing]);
+
+  // Adjust textarea height dynamically
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
+    }
+  }, [inputText]);
+
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = inputText.trim();
+    if (!trimmed || isProcessing) return;
+
+    onSendMessage(trimmed);
+    setInputText('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  const handleChipClick = (promptText) => {
+    if (isProcessing) return;
+    onSendMessage(promptText);
+  };
+
+  return (
+    <main className="chat-area">
+      {/* Persistent Chat Header */}
+      <header className="chat-header">
+        <h1 className="chat-header-title">
+          {activeSession?.title || 'New Chat'}
+        </h1>
+
+        {/* ThinkingOrb Status Indicator Pill */}
+        <div className="orb-status-pill" title={`Pluto State: ${orbState}`}>
+          <ThinkingOrb state={orbState} size={20} dark={false} theme="light" />
+          <span>{getStatusLabel(orbState)}</span>
+        </div>
+      </header>
+
+      {/* Message Stream */}
+      <div className="messages-container">
+        {isEmpty ? (
+          <div className="empty-state-container animate-message">
+            <div className="empty-state-orb-wrap">
+              <ThinkingOrb state={orbState} size={64} dark={false} theme="light" />
+            </div>
+            <h2 className="empty-state-title">What should Pluto build today?</h2>
+            <p className="empty-state-subtitle">
+              Local-first AI engineering partner. Connects directly to local FastAPI server on port 8000.
+            </p>
+            <div className="starter-chips-container">
+              {STARTER_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  className="starter-chip"
+                  onClick={() => handleChipClick(prompt)}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="messages-inner-wrapper">
+            {messages.map((msg) => {
+              if (msg.role === 'user') {
+                return (
+                  <div key={msg.id} className="user-message-bubble animate-message">
+                    {msg.content}
+                  </div>
+                );
+              }
+
+              return (
+                <div
+                  key={msg.id}
+                  className={`assistant-message-card animate-message ${msg.status === 'error' ? 'error-card' : ''}`}
+                >
+                  <div className="assistant-card-header">
+                    <div className="assistant-avatar-orb">
+                      <ThinkingOrb state="breathing" size={20} dark={false} theme="light" />
+                    </div>
+                    <span className="assistant-name">Pluto</span>
+                    {msg.timestamp && (
+                      <span className="assistant-timestamp">{msg.timestamp}</span>
+                    )}
+                  </div>
+                  <div className="assistant-card-body">{msg.content}</div>
+                </div>
+              );
+            })}
+
+            {/* In-flight Processing Indicator */}
+            {isProcessing && (
+              <div className="thinking-indicator-card animate-message">
+                <ThinkingOrb state={orbState} size={20} dark={false} theme="light" />
+                <span>Pluto is processing query...</span>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+      </div>
+
+      {/* Pinned Bottom Input Bar */}
+      <footer className="input-bar-container">
+        <div className="input-bar-wrapper">
+          <form className="input-box" onSubmit={handleSubmit}>
+            <textarea
+              ref={textareaRef}
+              className="input-textarea"
+              placeholder="Ask Pluto a question or describe an engineering task..."
+              rows={1}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={onInputFocus}
+              onBlur={onInputBlur}
+              disabled={isProcessing}
+            />
+
+            <button
+              type="submit"
+              className="send-btn"
+              disabled={!inputText.trim() || isProcessing}
+              title="Send message"
+              aria-label="Send message"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
+              </svg>
+            </button>
+          </form>
+
+          <div className="input-hint-text">
+            Pluto OS connects to FastAPI on port 8000. Verified local execution.
+          </div>
+        </div>
+      </footer>
+    </main>
+  );
+}
+
